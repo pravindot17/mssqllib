@@ -1,5 +1,6 @@
 let mssql = require('mssql');
 let libMssql = {};
+libMssql.conn = {};
 
 module.exports = {
     __init: init,
@@ -14,24 +15,24 @@ function init(dbConfig) {
     // set config here for later use
     libMssql.dbConfig = dbConfig;
 
-    if(!libMssql.conn) {
+    if(!libMssql.conn[libMssql.dbConfig['database']]) {
         return new Promise(function (resolve, reject) {
             mssql.connect(libMssql.dbConfig).then(function (connPool) {
-                libMssql.conn = connPool;
+                libMssql.conn[libMssql.dbConfig['database']] = connPool;
                 resolve(connPool);
             }).catch(function (err) {
-                libMssql.conn = null;
+                libMssql.conn[libMssql.dbConfig['database']] = null;
                 reject(err);
             });
         });
     }
-    return libMssql.conn;
+    return libMssql.conn[libMssql.dbConfig['database']];
 }
 
 function select(query, queryParams = []) {
     return new Promise((resolve, reject) => {
-        if (libMssql.conn) {
-            var sqlRequest = new mssql.Request(libMssql.conn);
+        if (libMssql.conn[libMssql.dbConfig['database']]) {
+            var sqlRequest = new mssql.Request(libMssql.conn[libMssql.dbConfig['database']]);
             for(let key in queryParams) {
                 sqlRequest.input(key, queryParams[key]);
             }
@@ -44,8 +45,8 @@ function select(query, queryParams = []) {
 
 function insert(query, queryParams = []) {
     return new Promise((resolve, reject) => {
-        if (libMssql.conn) {
-            var sqlRequest = new mssql.Request(libMssql.conn);
+        if (libMssql.conn[libMssql.dbConfig['database']]) {
+            var sqlRequest = new mssql.Request(libMssql.conn[libMssql.dbConfig['database']]);
             for(let key in queryParams) {
                 sqlRequest.input(key, queryParams[key]);
             }
@@ -59,8 +60,8 @@ function insert(query, queryParams = []) {
 
 function update(query, queryParams = []) {
     return new Promise((resolve, reject) => {
-        if (libMssql.conn) {
-            var sqlRequest = new mssql.Request(libMssql.conn);
+        if (libMssql.conn[libMssql.dbConfig['database']]) {
+            var sqlRequest = new mssql.Request(libMssql.conn[libMssql.dbConfig['database']]);
             for(let key in queryParams) {
                 sqlRequest.input(key, queryParams[key]);
             }
@@ -72,7 +73,7 @@ function update(query, queryParams = []) {
 }
 
 async function close() {
-    await libMssql.conn.close();
+    await libMssql.conn[libMssql.dbConfig['database']].close();
 }
 
 function getPoolConnection(dbConfig) {
@@ -80,12 +81,12 @@ function getPoolConnection(dbConfig) {
         // set config here for later use
         libMssql.dbConfig = dbConfig;
 
-        if (!libMssql.conn) {
-            libMssql.conn = new mssql.ConnectionPool(libMssql.dbConfig);
-            await libMssql.conn.connect();
-            resolve(libMssql.conn);
+        if (!libMssql.conn[libMssql.dbConfig['database']]) {
+            libMssql.conn[libMssql.dbConfig['database']] = new mssql.ConnectionPool(libMssql.dbConfig);
+            await libMssql.conn[libMssql.dbConfig['database']].connect();
+            resolve(libMssql.conn[libMssql.dbConfig['database']]);
         } else {
-            resolve(libMssql.conn);
+            resolve(libMssql.conn[libMssql.dbConfig['database']]);
         }
     });
 }
