@@ -2,6 +2,11 @@ Mssql Library for CRUD operations
 ===================
 
 ## How to use
+Get the library in your node modules using following command:
+```
+npm install --save https://github.com/pravindot17/mssqllib
+```
+
 ```js
 let mssqlDb = require('mssqllib');
 
