@@ -7,6 +7,7 @@ Get the library in your node modules using following command:
 npm install --save https://github.com/pravindot17/mssqllib
 ```
 
+### Use it in code
 ```js
 let mssqlDb = require('mssqllib');
 
