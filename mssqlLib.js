@@ -12,6 +12,11 @@ module.exports = {
 }
 
 function init(dbConfig) {
+    if(!dbConfig.server) reject(new Error('Please provide the server name'));
+    if(!dbConfig.database) reject(new Error('Please provide the database name'));
+    if(!dbConfig.user) reject(new Error('Please provide the database user'));
+    if(!dbConfig.password) reject(new Error('Please provide the database password'));
+
     // set config here for later use
     libMssql.dbConfig = dbConfig;
 
